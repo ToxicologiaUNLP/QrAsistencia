@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Generador QR por Legajo</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2em;
+      text-align: center;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 0.5em;
+    }
+    #qr {
+      margin-top: 2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Generar Código QR para Asistencia</h1>
+  <p>Ingrese su legajo para descargar su código QR personalizado.</p>
+
+  <input type="text" id="legajo" placeholder="Ingrese su legajo" />
+  <button onclick="generarQR()">Generar QR</button>
+
+  <div id="qr"></div>
+
+  <script>
+    const datosAlumnos = {
+      "79385/3": "Martina Andrade",
+      "83561/0": "Jazmin Andreu",
+      "12345/6": "Juan Pérez", // Ejemplo adicional
+      // Agregá más alumnos con este formato
+    };
+
+    function generarQR() {
+      const legajo = document.getElementById("legajo").value.trim();
+      const nombreCompleto = datosAlumnos[legajo];
+
+      if (!nombreCompleto) {
+        alert("Legajo no encontrado.");
+        return;
+      }
+
+      const contenidoQR = `${nombreCompleto} - Legajo: ${legajo}`;
+      const qrDiv = document.getElementById("qr");
+      qrDiv.innerHTML = ""; // Limpiar
+
+      QRCode.toDataURL(contenidoQR, { width: 300 }, function (err, url) {
+        if (err) return console.error(err);
+        const img = document.createElement("img");
+        img.src = url;
+        qrDiv.appendChild(img);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${nombreCompleto.replace(" ", "_")}_QR.png`;
+        link.textContent = "Descargar QR";
+        link.style.display = "block";
+        link.style.marginTop = "1em";
+        qrDiv.appendChild(link);
+      });
+    }
+  </script>
+</body>
+</html>

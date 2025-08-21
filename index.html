@@ -1,151 +1,222 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-AR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Laboratorio Central</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #e6f0fa; /* Celeste institucional */
+    :root{
+      --bg:#61adc1;
+      --text:#002b36;
+      --muted:#275b67;
+      --card:#ffffff;
+      --border:#e6e6e6;
+      --shade: rgba(0,0,0,.08);
     }
-    header {
-      text-align: center;
-      padding: 20px;
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg); color: var(--text);
     }
-    header img {
-      max-height: 80px;
-      margin-bottom: 10px;
+    header{
+      background: var(--card);
+      padding: 24px 16px;
+      text-align:center;
+      box-shadow: 0 2px 12px var(--shade);
     }
-    header h1 {
-      margin: 5px 0;
-      font-size: 28px;
-      color: #003366;
+    header img{
+      display:block; margin:0 auto 10px;
+      max-width: 220px; width: 125%; /* 25% más grande sobre el tamaño base */
     }
-    header h2 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: normal;
-      color: #336699;
+    header h1{
+      margin: 6px 0 4px; font-size: 28px; color: #003d4d;
     }
-    main {
-      background: #fff;
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    header h2{
+      margin:0; font-weight: normal; color: #0b6a7f;
+      font-size: 16px;
+    }
+
+    main{
+      max-width: 1280px; /* más ancho para escritorio */
+      margin: 28px auto; padding: 24px;
+      background: var(--card); border-radius: 14px;
+      box-shadow: 0 6px 24px var(--shade);
       position: relative;
     }
-    #searchBox {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-bottom: 15px;
+
+    .status{
+      margin-bottom: 12px; padding: 10px 12px; border-radius: 8px;
+      font-size: 14px;
+      background: #eef6ff; border:1px solid #cfe8ff; color:#0b4a6d;
     }
-    #suggestions {
-      border: 1px solid #ccc;
-      background: white;
-      max-height: 200px;
-      overflow-y: auto;
-      border-radius: 6px;
-      position: absolute;
-      width: calc(100% - 62px);
-      display: none;
-      z-index: 10;
+    .status.ok{ background:#eefaf1; border-color:#cfeedd; color:#205b3a;}
+    .status.err{ background:#fff2f2; border-color:#ffd0d0; color:#7a1c1c;}
+
+    .search-wrap{ position: relative; }
+    #searchBox{
+      width:100%; padding:12px 14px; font-size:16px;
+      border:1px solid #cfd8dc; border-radius:10px; outline:none;
     }
-    .suggestion {
-      padding: 10px;
-      cursor: pointer;
+    #searchBox:focus{ border-color:#7ab8c6; box-shadow: 0 0 0 3px rgba(122,184,198,.25); }
+
+    #suggestions{
+      position: absolute; left:0; right:0; top: calc(100% + 6px);
+      background: #fff; border:1px solid #dfe7ea; border-radius: 10px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+      max-height: 300px; overflow-y: auto; display:none; z-index: 20;
     }
-    .suggestion:hover {
-      background: #f0f0f0;
+    .suggestion{
+      padding: 10px 12px; cursor: pointer;
+      border-bottom: 1px solid #f1f3f5;
     }
-    #resultTable {
-      margin-top: 30px;
-      border-collapse: collapse;
-      width: 100%;
+    .suggestion:last-child{ border-bottom: 0; }
+    .suggestion:hover{ background:#f5fbfd; }
+
+    .no-results{ margin-top: 12px; color:#344; font-size:14px; }
+
+    .details{ margin-top: 18px; overflow-x:auto; }
+    table{
+      width: 100%; border-collapse: collapse; min-width: 900px;
     }
-    #resultTable th, #resultTable td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: left;
+    th, td{
+      border:1px solid var(--border); padding: 10px; vertical-align: top;
+      word-break: break-word; white-space: pre-wrap; /* respeta saltos de línea */
     }
-    #resultTable th {
-      background: #f2f2f2;
-    }
+    th{ background:#f6f9fa; text-align: left; color:#0b4a6d; }
   </style>
 </head>
 <body>
-
   <header>
-    <img src="logolab.png" alt="Logo Laboratorio">
+    <img src="logolab.png" alt="Logo del Laboratorio">
     <h1>Laboratorio Central</h1>
     <h2>Valores de referencia y condiciones en la toma de muestra</h2>
   </header>
 
   <main>
-    <input type="text" id="searchBox" placeholder="Escriba el tipo de estudio aquí">
-    <div id="suggestions"></div>
-    <div id="result"></div>
+    <div id="status" class="status">Cargando datos…</div>
+
+    <div class="search-wrap">
+      <input id="searchBox" type="text" placeholder="Escriba el tipo de estudio aquí" autocomplete="off" />
+      <div id="suggestions"></div>
+    </div>
+
+    <div id="result" class="details"></div>
   </main>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <!-- PapaParse -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha512-4i0bT0aQ4p1s6m18n6msG7kZHk7o0/5O2Jk0q9kA5m1Bo4bM8v4y3jzL5m5Z0oRzq0l5bE1t8QkQbX6CkqgVjw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
-    let estudios = [];
-    let headers = [];
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_1_DpeDPmqZOjSmtIGeb8Ri-yuGtWz7sWwwFMdyWssacb5RTdJkpu_7OBPi_yPw/pub?output=csv";
 
-    Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vT_1_DpeDPmqZOjSmtIGeb8Ri-yuGtWz7sWwwFMdyWssacb5RTdJkpu_7OBPi_yPw/pub?output=csv", {
+    const statusEl = document.getElementById('status');
+    const inputEl = document.getElementById('searchBox');
+    const sugEl = document.getElementById('suggestions');
+    const resultEl = document.getElementById('result');
+
+    let rows = [];        // array de objetos {header: valor}
+    let headers = [];     // orden original de columnas
+    let studyKey = null;  // nombre exacto de la columna ESTUDIO/ESTUDIOS
+
+    const normHeader = h => (h || "").toString().replace(/\r/g,'').trim();
+    const normText = t => (t || "").toString()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // saca acentos
+      .toLowerCase().trim();
+
+    Papa.parse(CSV_URL, {
       download: true,
-      complete: function(results) {
-        headers = results.data[0];
-        estudios = results.data.slice(1).filter(row => row.length > 1);
-        console.log("CSV cargado:", headers);
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: false,
+      complete: function(res){
+        try{
+          // Guardamos orden de columnas original (headers)
+          headers = (res.meta && res.meta.fields ? res.meta.fields : Object.keys(res.data[0] || {}))
+                      .map(normHeader);
+
+          // Normalizamos headers y valores
+          rows = res.data.map(obj => {
+            const clean = {};
+            for (const [k,v] of Object.entries(obj)) {
+              clean[normHeader(k)] = (v==null ? "" : String(v).replace(/\r/g,'').trim());
+            }
+            return clean;
+          }).filter(r => Object.keys(r).length > 0);
+
+          // Detectar columna de estudio (ESTUDIO o ESTUDIOS)
+          studyKey = headers.find(h => normHeader(h).toUpperCase() === "ESTUDIO")
+                  || headers.find(h => normHeader(h).toUpperCase() === "ESTUDIOS");
+
+          if (!rows.length) throw new Error("El CSV no contiene filas de datos.");
+          if (!studyKey)    throw new Error('No se encontró la columna "ESTUDIO" en el CSV.');
+
+          statusEl.textContent = `Datos cargados: ${rows.length} estudios.`;
+          statusEl.className = "status ok";
+        }catch(err){
+          statusEl.textContent = err.message;
+          statusEl.className = "status err";
+        }
+      },
+      error: function(err){
+        statusEl.textContent = "Error al cargar el CSV: " + err;
+        statusEl.className = "status err";
       }
     });
 
-    const searchBox = document.getElementById("searchBox");
-    const suggestionsDiv = document.getElementById("suggestions");
-    const resultDiv = document.getElementById("result");
-
-    searchBox.addEventListener("input", function() {
-      const query = this.value.toLowerCase().trim();
-      suggestionsDiv.innerHTML = "";
-      if (!query) {
-        suggestionsDiv.style.display = "none";
+    // Buscar mientras se escribe (insensible a acentos y mayúsculas)
+    inputEl.addEventListener('input', () => {
+      const q = normText(inputEl.value);
+      sugEl.innerHTML = "";
+      if (!q || !rows.length || !studyKey) {
+        sugEl.style.display = "none";
         return;
       }
+      const matches = rows.filter(r => normText(r[studyKey]).includes(q)).slice(0, 50);
+      if (!matches.length) {
+        sugEl.style.display = "none";
+        resultEl.innerHTML = '<div class="no-results">Sin resultados.</div>';
+        return;
+      }
+      sugEl.style.display = "block";
+      matches.slice(0, 12).forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'suggestion';
+        div.textContent = r[studyKey];
+        div.onclick = () => showDetails(r);
+        sugEl.appendChild(div);
+      });
+    });
 
-      const matches = estudios.filter(row =>
-        row[0] && row[0].toLowerCase().includes(query)
-      );
-
-      if (matches.length > 0) {
-        suggestionsDiv.style.display = "block";
-        matches.slice(0, 10).forEach(match => {
-          const div = document.createElement("div");
-          div.classList.add("suggestion");
-          div.textContent = match[0];
-          div.onclick = () => showResult(match);
-          suggestionsDiv.appendChild(div);
-        });
-      } else {
-        suggestionsDiv.style.display = "none";
+    // Enter = seleccionar primer sugerencia (si existe)
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && sugEl.children.length > 0) {
+        e.preventDefault();
+        sugEl.children[0].click();
       }
     });
 
-    function showResult(row) {
-      suggestionsDiv.style.display = "none";
-      searchBox.value = row[0];
-      let table = `<table id="resultTable"><tr>`;
-      headers.forEach(h => table += `<th>${h}</th>`);
-      table += "</tr><tr>";
-      row.forEach(cell => table += `<td>${cell}</td>`);
-      table += "</tr></table>`;
-      resultDiv.innerHTML = table;
+    function showDetails(row){
+      sugEl.style.display = "none";
+      inputEl.value = row[studyKey] || "";
+
+      // Construir tabla horizontal en el orden original de columnas
+      let html = '<table><thead><tr>';
+      headers.forEach(h => html += `<th>${escapeHtml(h)}</th>`);
+      html += '</tr></thead><tbody><tr>';
+      headers.forEach(h => html += `<td>${escapeHtml(row[normHeader(h)] || "")}</td>`);
+      html += '</tr></tbody></table>';
+      resultEl.innerHTML = html;
+    }
+
+    // Sanitizador simple
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#39;');
     }
   </script>
 </body>
 </html>
+

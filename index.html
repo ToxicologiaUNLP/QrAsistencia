@@ -91,6 +91,7 @@ iframe{ width:100%; height:600px; border:none; border-radius:12px; }
 <!-- Librerías -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_1_DpeDPmqZOjSmtIGeb8Ri-yuGtWz7sWwwFMdyWssacb5RTdJkpu_7OBPi_yPw/pub?output=csv";
@@ -100,7 +101,6 @@ const { jsPDF } = window.jspdf;
 const statusEl = document.getElementById('status');
 const inputEl = document.getElementById('searchBox');
 const sugEl = document.getElementById('suggestions');
-const resultEl = document.getElementById('result');
 const pdfFrame = document.getElementById('pdfFrame');
 
 let rows = [];
@@ -160,7 +160,7 @@ inputEl.addEventListener('input', ()=>{
     const div = document.createElement('div');
     div.className = 'suggestion';
     div.textContent = r[studyKey];
-    div.onclick = ()=>showPDF(r);
+    div.onclick = ()=>showPDFTable(r);
     sugEl.appendChild(div);
   });
 });
@@ -172,28 +172,20 @@ inputEl.addEventListener('keydown', (e)=>{
   }
 });
 
-function showPDF(row){
+function showPDFTable(row){
   sugEl.style.display="none";
   inputEl.value = row[studyKey] || "";
 
   const doc = new jsPDF();
-  let y = 10;
-  const lineHeight = 8;
+  const data = [headers.map(h=>row[normHeader(h)] || "")];
 
-  headers.forEach(h=>{
-    const val = row[normHeader(h)] || "";
-    // Manejar saltos de línea internos
-    const lines = val.split(/\r?\n/);
-    doc.setFontSize(12);
-    doc.text(`${h}:`, 10, y);
-    y += lineHeight;
-    lines.forEach(l=>{
-      doc.text(`${l}`, 12, y);
-      y += lineHeight;
-    });
-    y += 4;
-    // Si llega al final de la página, agrega nueva página
-    if(y>280){ doc.addPage(); y=10; }
+  doc.autoTable({
+    head: [headers],
+    body: data,
+    startY: 10,
+    styles: { fontSize: 10, cellWidth: 'wrap' },
+    headStyles: { fillColor: [0, 77, 99], textColor: 255 },
+    theme: 'grid'
   });
 
   const pdfUrl = doc.output('bloburl');

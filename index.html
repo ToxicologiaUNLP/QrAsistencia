@@ -66,6 +66,7 @@ main{
 }
 .suggestion:last-child{ border-bottom: 0; }
 .suggestion:hover{ background:#f5fbfd; }
+.suggestion.selected{ background: #d0f0f8; }
 .details{ margin-top: 18px; overflow-x:auto; }
 table{ 
   border-collapse: collapse; 
@@ -79,11 +80,11 @@ th, td{
   vertical-align: top; 
 }
 th{
-  white-space: normal; /* permite saltos de línea en títulos largos */
+  white-space: normal; /* títulos largos completos */
   word-break: break-word; 
 }
 td{
-  white-space: pre-wrap; /* mantiene saltos de línea del contenido */
+  white-space: pre-wrap; /* contenido con saltos de línea */
   word-wrap: break-word; 
 }
 </style>
@@ -116,6 +117,7 @@ const resultDiv = document.getElementById('result');
 let rows = [];
 let headers = [];
 let studyKey = null;
+let selectedIndex = -1;
 
 const normHeader = h => (h||"").toString().replace(/\r/g,'').trim();
 const normText = t => (t||"").toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -155,6 +157,7 @@ Papa.parse(CSV_URL, {
 inputEl.addEventListener('input', ()=>{
   const q = normText(inputEl.value);
   sugEl.innerHTML = "";
+  selectedIndex = -1;
   if(!q || !rows.length || !studyKey){
     sugEl.style.display="none";
     resultDiv.innerHTML = "";
@@ -177,11 +180,38 @@ inputEl.addEventListener('input', ()=>{
 });
 
 inputEl.addEventListener('keydown', (e)=>{
-  if(e.key==='Enter' && sugEl.children.length>0){
+  const items = sugEl.querySelectorAll('.suggestion');
+  if(items.length === 0) return;
+
+  if(e.key === 'ArrowDown'){
     e.preventDefault();
-    sugEl.children[0].click();
+    selectedIndex = (selectedIndex + 1) % items.length;
+    updateSelection(items);
+  } else if(e.key === 'ArrowUp'){
+    e.preventDefault();
+    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+    updateSelection(items);
+  } else if(e.key === 'Enter'){
+    e.preventDefault();
+    if(selectedIndex >= 0 && selectedIndex < items.length){
+      items[selectedIndex].click();
+      selectedIndex = -1;
+    } else if(items.length > 0){
+      items[0].click();
+    }
   }
 });
+
+function updateSelection(items){
+  items.forEach((el,i)=>{
+    if(i === selectedIndex){
+      el.classList.add('selected');
+      el.scrollIntoView({block:'nearest'});
+    } else {
+      el.classList.remove('selected');
+    }
+  });
+}
 
 function showTable(row){
   sugEl.style.display="none";

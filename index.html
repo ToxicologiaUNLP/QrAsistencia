@@ -1,209 +1,204 @@
 <!DOCTYPE html>
 <html lang="es-AR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Laboratorio Central</title>
-  <style>
-    :root{
-      --bg:#61adc1;
-      --text:#002b36;
-      --muted:#275b67;
-      --card:#ffffff;
-      --border:#e6e6e6;
-      --shade: rgba(0,0,0,.08);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg); color: var(--text);
-    }
-    header{
-      background: var(--card);
-      padding: 24px 16px;
-      text-align:center;
-      box-shadow: 0 2px 12px var(--shade);
-    }
-    header img{
-      display:block; margin:0 auto 10px;
-      max-width: 220px; width: 125%; /* 25% más grande sobre el tamaño base */
-    }
-    header h1{
-      margin: 6px 0 4px; font-size: 28px; color: #003d4d;
-    }
-    header h2{
-      margin:0; font-weight: normal; color: #0b6a7f;
-      font-size: 16px;
-    }
-
-    main{
-      max-width: 1280px; /* más ancho para escritorio */
-      margin: 28px auto; padding: 24px;
-      background: var(--card); border-radius: 14px;
-      box-shadow: 0 6px 24px var(--shade);
-      position: relative;
-    }
-
-    .status{
-      margin-bottom: 12px; padding: 10px 12px; border-radius: 8px;
-      font-size: 14px;
-      background: #eef6ff; border:1px solid #cfe8ff; color:#0b4a6d;
-    }
-    .status.ok{ background:#eefaf1; border-color:#cfeedd; color:#205b3a;}
-    .status.err{ background:#fff2f2; border-color:#ffd0d0; color:#7a1c1c;}
-
-    .search-wrap{ position: relative; }
-    #searchBox{
-      width:100%; padding:12px 14px; font-size:16px;
-      border:1px solid #cfd8dc; border-radius:10px; outline:none;
-    }
-    #searchBox:focus{ border-color:#7ab8c6; box-shadow: 0 0 0 3px rgba(122,184,198,.25); }
-
-    #suggestions{
-      position: absolute; left:0; right:0; top: calc(100% + 6px);
-      background: #fff; border:1px solid #dfe7ea; border-radius: 10px;
-      box-shadow: 0 10px 24px rgba(0,0,0,.08);
-      max-height: 300px; overflow-y: auto; display:none; z-index: 20;
-    }
-    .suggestion{
-      padding: 10px 12px; cursor: pointer;
-      border-bottom: 1px solid #f1f3f5;
-    }
-    .suggestion:last-child{ border-bottom: 0; }
-    .suggestion:hover{ background:#f5fbfd; }
-
-    .no-results{ margin-top: 12px; color:#344; font-size:14px; }
-
-    .details{ margin-top: 18px; overflow-x:auto; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Laboratorio Central</title>
+<style>
+:root{
+  --bg:#61adc1;
+  --text:#002b36;
+  --muted:#275b67;
+  --card:#ffffff;
+  --shade: rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg); color: var(--text);
+}
+header{
+  background: var(--card);
+  padding: 24px 16px;
+  text-align:center;
+  box-shadow: 0 2px 12px var(--shade);
+}
+header img{
+  display:block; margin:0 auto 10px;
+  max-width: 220px; width: 125%;
+}
+header h1{
+  margin: 6px 0 4px; font-size: 28px; color: #003d4d;
+}
+header h2{
+  margin:0; font-weight: normal; color: #0b6a7f;
+  font-size: 16px;
+}
+main{
+  max-width: 1280px;
+  margin: 28px auto; padding: 24px;
+  background: var(--card); border-radius: 14px;
+  box-shadow: 0 6px 24px var(--shade);
+  position: relative;
+}
+.status{
+  margin-bottom: 12px; padding: 10px 12px; border-radius: 8px;
+  font-size: 14px;
+  background: #eef6ff; border:1px solid #cfe8ff; color:#0b4a6d;
+}
+.status.ok{ background:#eefaf1; border-color:#cfeedd; color:#205b3a;}
+.status.err{ background:#fff2f2; border-color:#ffd0d0; color:#7a1c1c;}
+.search-wrap{ position: relative; margin-bottom:12px; }
+#searchBox{
+  width:100%; padding:12px 14px; font-size:16px;
+  border:1px solid #cfd8dc; border-radius:10px; outline:none;
+}
+#searchBox:focus{ border-color:#7ab8c6; box-shadow: 0 0 0 3px rgba(122,184,198,.25); }
+#suggestions{
+  position: absolute; left:0; right:0; top: calc(100% + 6px);
+  background: #fff; border:1px solid #dfe7ea; border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.08);
+  max-height: 300px; overflow-y: auto; display:none; z-index: 20;
+}
+.suggestion{
+  padding: 10px 12px; cursor: pointer;
+  border-bottom: 1px solid #f1f3f5;
+}
+.suggestion:last-child{ border-bottom: 0; }
+.suggestion:hover{ background:#f5fbfd; }
+.no-results{ margin-top: 12px; color:#344; font-size:14px; }
+.details{ margin-top: 18px; overflow-x:auto; }
+iframe{ width:100%; height:600px; border:none; border-radius:12px; }
+</style>
 </head>
 <body>
-  <header>
-    <img src="logolab.png" alt="Logo del Laboratorio">
-    <h1>Laboratorio Central</h1>
-    <h2>Valores de referencia y condiciones en la toma de muestra</h2>
-  </header>
+<header>
+  <img src="logolab.png" alt="Logo del Laboratorio">
+  <h1>Laboratorio Central</h1>
+  <h2>Valores de referencia y condiciones en la toma de muestra</h2>
+</header>
+<main>
+  <div id="status" class="status">Cargando datos…</div>
+  <div class="search-wrap">
+    <input id="searchBox" type="text" placeholder="Escriba el tipo de estudio aquí" autocomplete="off" />
+    <div id="suggestions"></div>
+  </div>
+  <div id="result" class="details">
+    <iframe id="pdfFrame"></iframe>
+  </div>
+</main>
 
-  <main>
-    <div id="status" class="status">Cargando datos…</div>
+<!-- Librerías -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <div class="search-wrap">
-      <input id="searchBox" type="text" placeholder="Escriba el tipo de estudio aquí" autocomplete="off" />
-      <div id="suggestions"></div>
-    </div>
+<script>
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_1_DpeDPmqZOjSmtIGeb8Ri-yuGtWz7sWwwFMdyWssacb5RTdJkpu_7OBPi_yPw/pub?output=csv";
 
-    <div id="result" class="details"></div>
-  </main>
+const { jsPDF } = window.jspdf;
 
-  <!-- PapaParse sin integrity -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script>
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_1_DpeDPmqZOjSmtIGeb8Ri-yuGtWz7sWwwFMdyWssacb5RTdJkpu_7OBPi_yPw/pub?output=csv";
+const statusEl = document.getElementById('status');
+const inputEl = document.getElementById('searchBox');
+const sugEl = document.getElementById('suggestions');
+const resultEl = document.getElementById('result');
+const pdfFrame = document.getElementById('pdfFrame');
 
-    const statusEl = document.getElementById('status');
-    const inputEl = document.getElementById('searchBox');
-    const sugEl = document.getElementById('suggestions');
-    const resultEl = document.getElementById('result');
+let rows = [];
+let headers = [];
+let studyKey = null;
 
-    let rows = [];        // array de objetos {header: valor}
-    let headers = [];     // orden original de columnas
-    let studyKey = null;  // nombre exacto de la columna ESTUDIO
+const normHeader = h => (h||"").toString().replace(/\r/g,'').trim();
+const normText = t => (t||"").toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 
-    const normHeader = h => (h || "").toString().replace(/\r/g,'').trim();
-    const normText = t => (t || "").toString()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // saca acentos
-      .toLowerCase().trim();
+Papa.parse(CSV_URL, {
+  download: true,
+  header: true,
+  skipEmptyLines: true,
+  dynamicTyping: false,
+  complete: function(res){
+    try{
+      headers = (res.meta.fields || Object.keys(res.data[0] || {})).map(normHeader);
+      rows = res.data.map(obj=>{
+        const clean = {};
+        for(const [k,v] of Object.entries(obj)) clean[normHeader(k)] = (v==null?"":String(v).replace(/\r/g,'').trim());
+        return clean;
+      }).filter(r=>Object.keys(r).length>0);
 
-    Papa.parse(CSV_URL, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      dynamicTyping: false,
-      complete: function(res){
-        try{
-          headers = (res.meta && res.meta.fields ? res.meta.fields : Object.keys(res.data[0] || {}))
-                      .map(normHeader);
+      studyKey = headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIO") || headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIOS");
 
-          rows = res.data.map(obj => {
-            const clean = {};
-            for (const [k,v] of Object.entries(obj)) {
-              clean[normHeader(k)] = (v==null ? "" : String(v).replace(/\r/g,'').trim());
-            }
-            return clean;
-          }).filter(r => Object.keys(r).length > 0);
+      if(!rows.length) throw new Error("El CSV no contiene filas de datos.");
+      if(!studyKey) throw new Error('No se encontró la columna "ESTUDIO" en el CSV.');
 
-          studyKey = headers.find(h => normHeader(h).toUpperCase() === "ESTUDIO")
-                  || headers.find(h => normHeader(h).toUpperCase() === "ESTUDIOS");
-
-          if (!rows.length) throw new Error("El CSV no contiene filas de datos.");
-          if (!studyKey)    throw new Error('No se encontró la columna "ESTUDIO" en el CSV.');
-
-          statusEl.textContent = `Datos cargados: ${rows.length} estudios.`;
-          statusEl.className = "status ok";
-        }catch(err){
-          statusEl.textContent = err.message;
-          statusEl.className = "status err";
-        }
-      },
-      error: function(err){
-        statusEl.textContent = "Error al cargar el CSV: " + err;
-        statusEl.className = "status err";
-      }
-    });
-
-    inputEl.addEventListener('input', () => {
-      const q = normText(inputEl.value);
-      sugEl.innerHTML = "";
-      if (!q || !rows.length || !studyKey) {
-        sugEl.style.display = "none";
-        return;
-      }
-      const matches = rows.filter(r => normText(r[studyKey]).includes(q)).slice(0, 50);
-      if (!matches.length) {
-        sugEl.style.display = "none";
-        resultEl.innerHTML = '<div class="no-results">Sin resultados.</div>';
-        return;
-      }
-      sugEl.style.display = "block";
-      matches.slice(0, 12).forEach(r => {
-        const div = document.createElement('div');
-        div.className = 'suggestion';
-        div.textContent = r[studyKey];
-        div.onclick = () => showDetails(r);
-        sugEl.appendChild(div);
-      });
-    });
-
-    inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && sugEl.children.length > 0) {
-        e.preventDefault();
-        sugEl.children[0].click();
-      }
-    });
-
-    // NUEVA FUNCIÓN PARA MOSTRAR RESULTADOS VERTICALMENTE
-    function showDetails(row){
-      sugEl.style.display = "none";
-      inputEl.value = row[studyKey] || "";
-
-      let html = '<div style="margin-top:12px;">';
-      headers.forEach(h => {
-        const val = row[normHeader(h)] || "";
-        html += `<div style="margin-bottom:10px;"><strong>${escapeHtml(h)}:</strong><br>${escapeHtml(val)}</div>`;
-      });
-      html += '</div>';
-
-      resultEl.innerHTML = html;
+      statusEl.textContent = `Datos cargados: ${rows.length} estudios.`;
+      statusEl.className = "status ok";
+    }catch(err){
+      statusEl.textContent = err.message;
+      statusEl.className = "status err";
     }
+  },
+  error: function(err){
+    statusEl.textContent = "Error al cargar el CSV: "+err;
+    statusEl.className = "status err";
+  }
+});
 
-    function escapeHtml(str){
-      return String(str)
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'",'&#39;');
-    }
-  </script>
+inputEl.addEventListener('input', ()=>{
+  const q = normText(inputEl.value);
+  sugEl.innerHTML = "";
+  if(!q || !rows.length || !studyKey){
+    sugEl.style.display="none";
+    return;
+  }
+  const matches = rows.filter(r=>normText(r[studyKey]).includes(q)).slice(0,50);
+  if(!matches.length){
+    sugEl.style.display="none";
+    pdfFrame.src = "";
+    return;
+  }
+  sugEl.style.display="block";
+  matches.slice(0,12).forEach(r=>{
+    const div = document.createElement('div');
+    div.className = 'suggestion';
+    div.textContent = r[studyKey];
+    div.onclick = ()=>showPDF(r);
+    sugEl.appendChild(div);
+  });
+});
+
+inputEl.addEventListener('keydown', (e)=>{
+  if(e.key==='Enter' && sugEl.children.length>0){
+    e.preventDefault();
+    sugEl.children[0].click();
+  }
+});
+
+function showPDF(row){
+  sugEl.style.display="none";
+  inputEl.value = row[studyKey] || "";
+
+  const doc = new jsPDF();
+  let y = 10;
+  const lineHeight = 8;
+
+  headers.forEach(h=>{
+    const val = row[normHeader(h)] || "";
+    // Manejar saltos de línea internos
+    const lines = val.split(/\r?\n/);
+    doc.setFontSize(12);
+    doc.text(`${h}:`, 10, y);
+    y += lineHeight;
+    lines.forEach(l=>{
+      doc.text(`${l}`, 12, y);
+      y += lineHeight;
+    });
+    y += 4;
+    // Si llega al final de la página, agrega nueva página
+    if(y>280){ doc.addPage(); y=10; }
+  });
+
+  const pdfUrl = doc.output('bloburl');
+  pdfFrame.src = pdfUrl;
+}
+</script>
 </body>
 </html>

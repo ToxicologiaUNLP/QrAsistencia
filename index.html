@@ -67,25 +67,27 @@ main{
 .suggestion:last-child{ border-bottom: 0; }
 .suggestion:hover{ background:#f5fbfd; }
 .suggestion.selected{ background: #d0f0f8; }
-.details{ margin-top: 18px; overflow-x:auto; }
-table{ 
-  border-collapse: collapse; 
-  width: 100%; 
-  table-layout: auto; 
+.details{
+  margin-top: 18px;
+  overflow-x: auto; /* scroll horizontal si la tabla es muy ancha */
 }
-th, td{ 
-  border: 1px solid #333; 
-  padding: 6px; 
-  text-align: left; 
-  vertical-align: top; 
+table{
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: auto;
+}
+th, td{
+  border: 1px solid #333;
+  padding: 6px;
+  text-align: left;
+  vertical-align: top;
 }
 th{
-  white-space: normal; /* títulos largos completos */
-  word-break: break-word; 
+  white-space: nowrap; /* títulos siempre en horizontal */
 }
 td{
   white-space: pre-wrap; /* contenido con saltos de línea */
-  word-wrap: break-word; 
+  word-wrap: break-word;
 }
 </style>
 </head>
@@ -229,4 +231,3 @@ function showTable(row){
 </script>
 </body>
 </html>
-

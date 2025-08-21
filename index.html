@@ -67,7 +67,8 @@ main{
 .suggestion:last-child{ border-bottom: 0; }
 .suggestion:hover{ background:#f5fbfd; }
 .details{ margin-top: 18px; overflow-x:auto; }
-iframe{ width:100%; height:600px; border:none; border-radius:12px; }
+table{ border-collapse: collapse; width: 100%; }
+th, td{ border: 1px solid #333; padding: 6px; text-align: left; vertical-align: top; white-space: pre-wrap; word-wrap: break-word; }
 </style>
 </head>
 <body>
@@ -82,23 +83,18 @@ iframe{ width:100%; height:600px; border:none; border-radius:12px; }
     <input id="searchBox" type="text" placeholder="Escriba el tipo de estudio aquí" autocomplete="off" />
     <div id="suggestions"></div>
   </div>
-  <div id="result" class="details">
-    <iframe id="pdfFrame"></iframe>
-  </div>
+  <div id="result" class="details"></div>
 </main>
 
-<!-- Librerías -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_1_DpeDPmqZOjSmtIGeb8Ri-yuGtWz7sWwwFMdyWssacb5RTdJkpu_7OBPi_yPw/pub?output=csv";
-const { jsPDF } = window.jspdf;
 
 const statusEl = document.getElementById('status');
 const inputEl = document.getElementById('searchBox');
 const sugEl = document.getElementById('suggestions');
-const pdfFrame = document.getElementById('pdfFrame');
+const resultDiv = document.getElementById('result');
 
 let rows = [];
 let headers = [];
@@ -144,12 +140,13 @@ inputEl.addEventListener('input', ()=>{
   sugEl.innerHTML = "";
   if(!q || !rows.length || !studyKey){
     sugEl.style.display="none";
+    resultDiv.innerHTML = "";
     return;
   }
   const matches = rows.filter(r=>normText(r[studyKey]).includes(q)).slice(0,50);
   if(!matches.length){
     sugEl.style.display="none";
-    pdfFrame.src = "";
+    resultDiv.innerHTML = "";
     return;
   }
   sugEl.style.display="block";
@@ -157,7 +154,7 @@ inputEl.addEventListener('input', ()=>{
     const div = document.createElement('div');
     div.className = 'suggestion';
     div.textContent = r[studyKey];
-    div.onclick = ()=>showPDFHTML(r);
+    div.onclick = ()=>showTable(r);
     sugEl.appendChild(div);
   });
 });
@@ -169,35 +166,18 @@ inputEl.addEventListener('keydown', (e)=>{
   }
 });
 
-function showPDFHTML(row){
+function showTable(row){
   sugEl.style.display="none";
   inputEl.value = row[studyKey] || "";
 
-  // Crear tabla HTML
-  const container = document.createElement('div');
-  const tableStyle = `
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 12px;
-  `;
-  container.innerHTML = `<table style="${tableStyle}">
+  resultDiv.innerHTML = `<table>
     <thead>
-      <tr>${headers.map(h=>`<th style="border:1px solid #333;padding:6px;text-align:left;">${h}</th>`).join('')}</tr>
+      <tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>
     </thead>
     <tbody>
-      <tr>${headers.map(h=>`<td style="border:1px solid #333;padding:6px;">${row[normHeader(h)] || ''}</td>`).join('')}</tr>
+      <tr>${headers.map(h=>`<td>${row[normHeader(h)] || ''}</td>`).join('')}</tr>
     </tbody>
   </table>`;
-
-  const doc = new jsPDF();
-  doc.html(container, {
-    callback: function(pdf){
-      pdfFrame.src = pdf.output('bloburl');
-    },
-    x: 10,
-    y: 10,
-    html2canvas: { scale: 0.6 }
-  });
 }
 </script>
 </body>

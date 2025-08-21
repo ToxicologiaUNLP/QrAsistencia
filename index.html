@@ -103,8 +103,8 @@
     <div id="result" class="details"></div>
   </main>
 
-  <!-- PapaParse -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha512-4i0bT0aQ4p1s6m18n6msG7kZHk7o0/5O2Jk0q9kA5m1Bo4bM8v4y3jzL5m5Z0oRzq0l5bE1t8QkQbX6CkqgVjw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- PapaParse sin integrity -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_1_DpeDPmqZOjSmtIGeb8Ri-yuGtWz7sWwwFMdyWssacb5RTdJkpu_7OBPi_yPw/pub?output=csv";
 
@@ -129,11 +129,9 @@
       dynamicTyping: false,
       complete: function(res){
         try{
-          // Guardamos orden de columnas original (headers)
           headers = (res.meta && res.meta.fields ? res.meta.fields : Object.keys(res.data[0] || {}))
                       .map(normHeader);
 
-          // Normalizamos headers y valores
           rows = res.data.map(obj => {
             const clean = {};
             for (const [k,v] of Object.entries(obj)) {
@@ -142,7 +140,6 @@
             return clean;
           }).filter(r => Object.keys(r).length > 0);
 
-          // Detectar columna de estudio (ESTUDIO o ESTUDIOS)
           studyKey = headers.find(h => normHeader(h).toUpperCase() === "ESTUDIO")
                   || headers.find(h => normHeader(h).toUpperCase() === "ESTUDIOS");
 
@@ -162,7 +159,6 @@
       }
     });
 
-    // Buscar mientras se escribe (insensible a acentos y mayúsculas)
     inputEl.addEventListener('input', () => {
       const q = normText(inputEl.value);
       sugEl.innerHTML = "";
@@ -186,7 +182,6 @@
       });
     });
 
-    // Enter = seleccionar primer sugerencia (si existe)
     inputEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && sugEl.children.length > 0) {
         e.preventDefault();
@@ -198,7 +193,6 @@
       sugEl.style.display = "none";
       inputEl.value = row[studyKey] || "";
 
-      // Construir tabla horizontal en el orden original de columnas
       let html = '<table><thead><tr>';
       headers.forEach(h => html += `<th>${escapeHtml(h)}</th>`);
       html += '</tr></thead><tbody><tr>';
@@ -207,7 +201,6 @@
       resultEl.innerHTML = html;
     }
 
-    // Sanitizador simple
     function escapeHtml(str){
       return String(str)
         .replaceAll('&','&amp;')

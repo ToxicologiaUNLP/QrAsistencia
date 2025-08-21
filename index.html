@@ -67,8 +67,19 @@ main{
 .suggestion:last-child{ border-bottom: 0; }
 .suggestion:hover{ background:#f5fbfd; }
 .details{ margin-top: 18px; overflow-x:auto; }
-table{ border-collapse: collapse; width: 100%; }
-th, td{ border: 1px solid #333; padding: 6px; text-align: left; vertical-align: top; white-space: pre-wrap; word-wrap: break-word; }
+table{ 
+  border-collapse: collapse; 
+  width: 100%; 
+  table-layout: auto; /* columnas se adaptan al contenido */
+}
+th, td{ 
+  border: 1px solid #333; 
+  padding: 6px; 
+  text-align: left; 
+  vertical-align: top; 
+  white-space: normal; /* permite que el texto haga salto de línea */
+  word-break: break-word; /* fuerza salto de línea si es muy largo */
+}
 </style>
 </head>
 <body>

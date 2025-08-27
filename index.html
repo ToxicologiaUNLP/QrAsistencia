@@ -74,7 +74,7 @@ main{
 table{
   border-collapse: collapse;
   width: 100%;
-  table-layout: fixed; /* respeta los anchos que definimos */
+  table-layout: auto; /* se ajusta automáticamente según contenido */
 }
 th, td{
   border: 1px solid #333;
@@ -87,14 +87,12 @@ th{
 }
 td{
   word-wrap: break-word;
-  white-space: normal; /* en general, el texto puede ocupar varias líneas */
+  white-space: normal; /* texto puede ocupar varias líneas en general */
 }
-/* Ajuste especial para la columna de Valores de referencia (4ta columna del CSV) */
+/* Columna de Valores de referencia (4ta) */
 td:nth-child(4),
 th:nth-child(4){
-  width: 35%;        /* le damos más espacio fijo */
-  min-width: 300px;  /* evita que se achique demasiado */
-  white-space: pre;  /* respeta los espacios tal cual en Sheets */
+  white-space: pre; /* respeta espacios y texto tal cual en Sheets */
 }
 </style>
 </head>
@@ -250,4 +248,5 @@ setInterval(loadData, 30000);
 </script>
 </body>
 </html>
+
 

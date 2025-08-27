@@ -74,19 +74,19 @@ main{
 table{
   border-collapse: collapse;
   width: 100%;
-  table-layout: auto;
+  table-layout: auto; /* ajuste según contenido */
 }
 th, td{
   border: 1px solid #333;
   padding: 6px;
   text-align: left;
   vertical-align: top;
+  white-space: normal; /* que el texto se muestre en varias líneas */
 }
 th{
   white-space: nowrap; /* títulos siempre en horizontal */
 }
 td{
-  white-space: pre-wrap; /* contenido con saltos de línea */
   word-wrap: break-word;
 }
 </style>
@@ -111,6 +111,11 @@ td{
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_1_DpeDPmqZOjSmtIGeb8Ri-yuGtWz7sWwwFMdyWssacb5RTdJkpu_7OBPi_yPw/pub?output=csv";
 
+// Evitar caché: agregar timestamp
+function getNoCacheUrl(){
+  return CSV_URL + "&t=" + Date.now();
+}
+
 const statusEl = document.getElementById('status');
 const inputEl = document.getElementById('searchBox');
 const sugEl = document.getElementById('suggestions');
@@ -124,37 +129,41 @@ let selectedIndex = -1;
 const normHeader = h => (h||"").toString().replace(/\r/g,'').trim();
 const normText = t => (t||"").toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 
-Papa.parse(CSV_URL, {
-  download: true,
-  header: true,
-  skipEmptyLines: true,
-  dynamicTyping: false,
-  complete: function(res){
-    try{
-      headers = (res.meta.fields || Object.keys(res.data[0] || {})).map(normHeader);
-      rows = res.data.map(obj=>{
-        const clean = {};
-        for(const [k,v] of Object.entries(obj)) clean[normHeader(k)] = (v==null?"":String(v).replace(/\r/g,'').trim());
-        return clean;
-      }).filter(r=>Object.keys(r).length>0);
+function loadData(){
+  Papa.parse(getNoCacheUrl(), {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    dynamicTyping: false,
+    complete: function(res){
+      try{
+        headers = (res.meta.fields || Object.keys(res.data[0] || {})).map(normHeader);
+        rows = res.data.map(obj=>{
+          const clean = {};
+          for(const [k,v] of Object.entries(obj)) clean[normHeader(k)] = (v==null?"":String(v).replace(/\r/g,'').trim());
+          return clean;
+        }).filter(r=>Object.keys(r).length>0);
 
-      studyKey = headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIO") || headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIOS");
+        studyKey = headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIO") || headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIOS");
 
-      if(!rows.length) throw new Error("El CSV no contiene filas de datos.");
-      if(!studyKey) throw new Error('No se encontró la columna "ESTUDIO" en el CSV.');
+        if(!rows.length) throw new Error("El CSV no contiene filas de datos.");
+        if(!studyKey) throw new Error('No se encontró la columna "ESTUDIO" en el CSV.');
 
-      statusEl.textContent = `Datos cargados: ${rows.length} estudios.`;
-      statusEl.className = "status ok";
-    }catch(err){
-      statusEl.textContent = err.message;
+        statusEl.textContent = `Datos cargados: ${rows.length} estudios.`;
+        statusEl.className = "status ok";
+      }catch(err){
+        statusEl.textContent = err.message;
+        statusEl.className = "status err";
+      }
+    },
+    error: function(err){
+      statusEl.textContent = "Error al cargar el CSV: "+err;
       statusEl.className = "status err";
     }
-  },
-  error: function(err){
-    statusEl.textContent = "Error al cargar el CSV: "+err;
-    statusEl.className = "status err";
-  }
-});
+  });
+}
+
+loadData();
 
 inputEl.addEventListener('input', ()=>{
   const q = normText(inputEl.value);

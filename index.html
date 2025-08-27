@@ -69,30 +69,28 @@ main{
 .suggestion.selected{ background: #d0f0f8; }
 .details{
   margin-top: 18px;
-  overflow-x: auto; /* scroll horizontal si la tabla es muy ancha */
+  overflow-x: auto;
 }
 table{
   border-collapse: collapse;
-  width: 100%;
-  table-layout: auto; /* se ajusta automáticamente según contenido */
+  table-layout: auto;      /* ✅ que cada columna se ajuste al contenido */
+  width: max-content;      /* ✅ que la tabla se expanda según contenido */
+  min-width: 100%;         /* ✅ ocupa siempre al menos todo el ancho */
 }
 th, td{
   border: 1px solid #333;
-  padding: 6px;
+  padding: 6px 10px;
   text-align: left;
   vertical-align: top;
-}
-th{
-  white-space: nowrap; /* títulos siempre en horizontal */
+  white-space: nowrap;     /* ✅ siempre en horizontal */
 }
 td{
-  word-wrap: break-word;
-  white-space: normal; /* texto puede ocupar varias líneas en general */
+  white-space: pre-wrap;   /* ✅ respeta saltos, pero mantiene horizontal */
 }
 /* Columna de Valores de referencia (4ta) */
 td:nth-child(4),
 th:nth-child(4){
-  white-space: pre; /* respeta espacios y texto tal cual en Sheets */
+  white-space: pre-wrap; /* respeta saltos de línea del Sheets */
 }
 </style>
 </head>
@@ -116,7 +114,7 @@ th:nth-child(4){
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_1_DpeDPmqZOjSmtIGeb8Ri-yuGtWz7sWwwFMdyWssacb5RTdJkpu_7OBPi_yPw/pub?output=csv";
 
-// Evitar caché: agregar timestamp
+// Evitar caché
 function getNoCacheUrl(){
   return CSV_URL + "&t=" + Date.now();
 }
@@ -142,14 +140,24 @@ function loadData(){
     dynamicTyping: false,
     complete: function(res){
       try{
-        headers = (res.meta.fields || Object.keys(res.data[0] || {})).map(normHeader);
+        // ✅ Filtrar headers vacíos
+        headers = (res.meta.fields || Object.keys(res.data[0] || {}))
+          .map(normHeader)
+          .filter(h => h !== "");
+
         rows = res.data.map(obj=>{
           const clean = {};
-          for(const [k,v] of Object.entries(obj)) clean[normHeader(k)] = (v==null?"":String(v).replace(/\r/g,'').trim());
+          for(const [k,v] of Object.entries(obj)){
+            const nk = normHeader(k);
+            if(headers.includes(nk)){  // ✅ solo guardamos columnas con título
+              clean[nk] = (v==null?"":String(v).replace(/\r/g,'').trim());
+            }
+          }
           return clean;
         }).filter(r=>Object.keys(r).length>0);
 
-        studyKey = headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIO") || headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIOS");
+        studyKey = headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIO") 
+                 || headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIOS");
 
         if(!rows.length) throw new Error("El CSV no contiene filas de datos.");
         if(!studyKey) throw new Error('No se encontró la columna "ESTUDIO" en el CSV.');
@@ -243,10 +251,11 @@ function showTable(row){
   </table>`;
 }
 
-// Auto-refresh cada 30 segundos para reflejar cambios en el CSV
+// Auto-refresh cada 30s
 setInterval(loadData, 30000);
 </script>
 </body>
 </html>
+
 
 

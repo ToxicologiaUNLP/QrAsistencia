@@ -73,24 +73,24 @@ main{
 }
 table{
   border-collapse: collapse;
-  table-layout: auto;      /* ✅ que cada columna se ajuste al contenido */
-  width: max-content;      /* ✅ que la tabla se expanda según contenido */
-  min-width: 100%;         /* ✅ ocupa siempre al menos todo el ancho */
+  table-layout: auto;      /* columnas se ajustan al contenido */
+  width: max-content;      /* la tabla se expande según contenido */
+  min-width: 100%;         /* ocupa al menos todo el ancho */
 }
 th, td{
   border: 1px solid #333;
   padding: 6px 10px;
   text-align: left;
   vertical-align: top;
-  white-space: nowrap;     /* ✅ siempre en horizontal */
+  white-space: nowrap;     /* siempre horizontal */
 }
 td{
-  white-space: pre-wrap;   /* ✅ respeta saltos, pero mantiene horizontal */
+  white-space: pre-wrap;   /* respeta saltos, mantiene horizontal */
 }
 /* Columna de Valores de referencia (4ta) */
 td:nth-child(4),
 th:nth-child(4){
-  white-space: pre-wrap; /* respeta saltos de línea del Sheets */
+  white-space: pre-wrap;
 }
 </style>
 </head>
@@ -140,16 +140,16 @@ function loadData(){
     dynamicTyping: false,
     complete: function(res){
       try{
-        // ✅ Filtrar headers vacíos
+        // ✅ Filtrar headers vacíos y falsos (_1, 1, 2, etc.)
         headers = (res.meta.fields || Object.keys(res.data[0] || {}))
           .map(normHeader)
-          .filter(h => h !== "");
+          .filter(h => h !== "" && !/^_?\d+$/.test(h));
 
         rows = res.data.map(obj=>{
           const clean = {};
           for(const [k,v] of Object.entries(obj)){
             const nk = normHeader(k);
-            if(headers.includes(nk)){  // ✅ solo guardamos columnas con título
+            if(headers.includes(nk)){  
               clean[nk] = (v==null?"":String(v).replace(/\r/g,'').trim());
             }
           }
@@ -256,6 +256,7 @@ setInterval(loadData, 30000);
 </script>
 </body>
 </html>
+
 
 
 

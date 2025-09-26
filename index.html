@@ -95,17 +95,17 @@ th:nth-child(4){
 /* Botón PDF */
 .pdf-btn{
   display:inline-block;
-  margin-top:16px;
-  padding:10px 18px;
-  font-size:15px;
+  margin-top:4px;
+  padding:6px 12px;
+  font-size:14px;
   font-weight:bold;
   text-decoration:none;
   color:#fff;
   background:#0b6a7f;
   border:none;
   cursor:pointer;
-  border-radius:8px;
-  box-shadow:0 3px 8px var(--shade);
+  border-radius:6px;
+  box-shadow:0 2px 6px var(--shade);
   transition: background 0.2s, transform 0.1s;
 }
 .pdf-btn:hover{
@@ -297,41 +297,40 @@ function updateSelection(items){
   });
 }
 
+// Función para abrir PDF en modal
+function openPdf(url){
+  pdfFrame.src = url;
+  pdfModal.style.display = "flex";
+}
+
 function showTable(row){
   sugEl.style.display="none";
   inputEl.value = row[studyKey] || "";
+
+  // Construir tabla con posible botón en lugar de link
+  const tbodyHtml = `<tr>${headers.map(h=>{
+    const cell = row[normHeader(h)] || '';
+    // Detectar PDF en la celda
+    if(cell.toLowerCase().includes('.pdf') || cell.toLowerCase().includes('drive.google.com')){
+      let embedUrl = cell;
+      const match = cell.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+      if(match){
+        embedUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+      }
+      return `<td><button class="pdf-btn" onclick="openPdf('${embedUrl}')">Ver valores</button></td>`;
+    } else {
+      return `<td>${cell}</td>`;
+    }
+  }).join('')}</tr>`;
 
   resultDiv.innerHTML = `<table>
     <thead>
       <tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>
     </thead>
     <tbody>
-      <tr>${headers.map(h=>`<td>${row[normHeader(h)] || ''}</td>`).join('')}</tr>
+      ${tbodyHtml}
     </tbody>
   </table>`;
-
-  // Buscar PDF
-  const pdfUrl = Object.values(row).find(val => 
-    val && (val.toLowerCase().includes('.pdf') || val.toLowerCase().includes('drive.google.com'))
-  );
-
-  if(pdfUrl){
-    let embedUrl = pdfUrl;
-    const match = pdfUrl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
-    if(match){
-      embedUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
-    }
-
-    const btn = document.createElement('button');
-    btn.textContent = "Ver valores";
-    btn.className = "pdf-btn";
-    resultDiv.appendChild(btn);
-
-    btn.addEventListener('click', ()=>{
-      pdfFrame.src = embedUrl;
-      pdfModal.style.display = "flex";
-    });
-  }
 }
 
 // Cerrar modal
@@ -352,6 +351,7 @@ setInterval(loadData, 30000);
 </script>
 </body>
 </html>
+
 
 
 

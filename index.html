@@ -168,10 +168,7 @@ th:nth-child(4){
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  opacity:0;
-  transition: opacity 0.25s ease;
 }
-#contactModal.show{ opacity:1; }
 #contactModal .modal-content{
   background:#ffffff;
   padding:30px;
@@ -384,13 +381,13 @@ function showTable(row){
 pdfClose.addEventListener('click', ()=>{ pdfModal.style.display="none"; pdfFrame.src=""; });
 pdfModal.addEventListener('click',(e)=>{ if(e.target===pdfModal){ pdfModal.style.display="none"; pdfFrame.src=""; } });
 
-// Modal Contacto
+// Modal Contacto funcional
 const contactModal = document.getElementById('contactModal');
 const openContact = document.getElementById('openContact');
 const closeContact = document.getElementById('closeContact');
-openContact.addEventListener('click', ()=> contactModal.classList.add('show'));
-closeContact.addEventListener('click', ()=> contactModal.classList.remove('show'));
-contactModal.addEventListener('click', (e)=>{ if(e.target===contactModal) contactModal.classList.remove('show'); });
+openContact.addEventListener('click', ()=>{ contactModal.style.display='flex'; });
+closeContact.addEventListener('click', ()=>{ contactModal.style.display='none'; });
+contactModal.addEventListener('click',(e)=>{ if(e.target===contactModal) contactModal.style.display='none'; });
 
 setInterval(loadData,30000);
 </script>

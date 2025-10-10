@@ -124,6 +124,12 @@ th:nth-child(4){
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  opacity:0;
+  transition: opacity 0.3s ease;
+}
+#pdfModal.show, #contactModal.show{
+  display:flex;
+  opacity:1;
 }
 #pdfModal iframe{
   width:90%;
@@ -135,15 +141,15 @@ th:nth-child(4){
 }
 .close-btn{
   position:absolute;
-  top:20px;
-  right:30px;
-  font-size:28px;
+  top:12px;
+  right:18px;
+  font-size:26px;
   font-weight:bold;
-  color:#fff;
+  color:#333;
   cursor:pointer;
 }
 .close-btn:hover{
-  color:#ddd;
+  color:#0b6a7f;
 }
 
 /* Botón contacto */
@@ -183,16 +189,17 @@ th:nth-child(4){
 }
 .contact-area h3{
   margin:0;
-  font-size:20px;
+  font-size:22px;
   color:#0b6a7f;
+  font-weight:bold;
 }
 .contact-area p{
   margin:6px 0;
   font-size:15px;
-  color:#275b67;
+  color:#000; /* ahora internos y emails son negros */
 }
 .contact-area a{
-  color:#0b6a7f;
+  color:#000;
   text-decoration:none;
 }
 .contact-area a:hover{
@@ -225,8 +232,8 @@ th:nth-child(4){
 
 <!-- Modal de contacto -->
 <div id="contactModal">
-  <span class="close-btn" id="closeContact">&times;</span>
   <div class="modal-content">
+    <span class="close-btn" id="closeContact">&times;</span>
     <div class="contact-area">
       <h3>ADMISIÓN</h3>
       <p>Internos: 1706 / 1754 / 1714</p>
@@ -308,30 +315,12 @@ function loadData(){
     download: true,
     header: true,
     skipEmptyLines: true,
-    dynamicTyping: false,
     complete: function(res){
       try{
-        headers = (res.meta.fields || Object.keys(res.data[0] || {}))
-          .map(normHeader)
-          .filter(h => h !== "" && !/^_?\d+$/.test(h));
-
-        rows = res.data.map(obj=>{
-          const clean = {};
-          for(const [k,v] of Object.entries(obj)){
-            const nk = normHeader(k);
-            if(headers.includes(nk)){  
-              clean[nk] = (v==null?"":String(v).replace(/\r/g,'').trim());
-            }
-          }
-          return clean;
-        }).filter(r=>Object.keys(r).length>0);
-
-        studyKey = headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIO") 
-                 || headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIOS");
-
+        headers = (res.meta.fields || Object.keys(res.data[0] || {})).map(normHeader);
+        rows = res.data;
+        studyKey = headers.find(h=>normHeader(h).toUpperCase()==="ESTUDIO");
         if(!rows.length) throw new Error("El CSV no contiene filas de datos.");
-        if(!studyKey) throw new Error('No se encontró la columna "ESTUDIO" en el CSV.');
-
         statusEl.textContent = `Datos cargados: ${rows.length} estudios.`;
         statusEl.className = "status ok";
       }catch(err){
@@ -373,50 +362,25 @@ inputEl.addEventListener('input', ()=>{
   });
 });
 
-inputEl.addEventListener('keydown', (e)=>{
-  const items = sugEl.querySelectorAll('.suggestion');
-  if(items.length === 0) return;
-
-  if(e.key === 'ArrowDown'){
-    e.preventDefault();
-    selectedIndex = (selectedIndex + 1) % items.length;
-    updateSelection(items);
-  } else if(e.key === 'ArrowUp'){
-    e.preventDefault();
-    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
-    updateSelection(items);
-  } else if(e.key === 'Enter'){
-    e.preventDefault();
-    if(selectedIndex >= 0 && selectedIndex < items.length){
-      items[selectedIndex].click();
-      selectedIndex = -1;
-    } else if(items.length > 0){
-      items[0].click();
-    }
-  }
-});
-
-function updateSelection(items){
-  items.forEach((el,i)=>{
-    if(i === selectedIndex){
-      el.classList.add('selected');
-      el.scrollIntoView({block:'nearest'});
-    } else {
-      el.classList.remove('selected');
-    }
-  });
-}
-
-// Función para abrir PDF en modal
+// abrir y cerrar PDF
 function openPdf(url){
   pdfFrame.src = url;
-  pdfModal.style.display = "flex";
+  pdfModal.classList.add("show");
 }
+pdfClose.addEventListener('click', ()=>{
+  pdfModal.classList.remove("show");
+  setTimeout(()=>{ pdfModal.style.display="none"; pdfFrame.src=""; },300);
+});
+pdfModal.addEventListener('click', e=>{
+  if(e.target===pdfModal){
+    pdfModal.classList.remove("show");
+    setTimeout(()=>{ pdfModal.style.display="none"; pdfFrame.src=""; },300);
+  }
+});
 
 function showTable(row){
   sugEl.style.display="none";
   inputEl.value = row[studyKey] || "";
-
   const tbodyHtml = `<tr>${headers.map(h=>{
     const cell = row[normHeader(h)] || '';
     if(cell.toLowerCase().includes('.pdf') || cell.toLowerCase().includes('drive.google.com')){
@@ -430,41 +394,32 @@ function showTable(row){
       return `<td>${cell}</td>`;
     }
   }).join('')}</tr>`;
-
   resultDiv.innerHTML = `<table>
-    <thead>
-      <tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>
-    </thead>
-    <tbody>
-      ${tbodyHtml}
-    </tbody>
+    <thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>${tbodyHtml}</tbody>
   </table>`;
 }
 
-// Cerrar modal PDF
-pdfClose.addEventListener('click', ()=>{
-  pdfModal.style.display = "none";
-  pdfFrame.src = "";
-});
-pdfModal.addEventListener('click', (e)=>{
-  if(e.target === pdfModal){
-    pdfModal.style.display = "none";
-    pdfFrame.src = "";
-  }
-});
-
-// Modal contacto
+// Modal contacto con transición suave
 const contactModal = document.getElementById('contactModal');
 const openContact = document.getElementById('openContact');
 const closeContact = document.getElementById('closeContact');
 
-openContact.addEventListener('click', ()=> contactModal.style.display = "flex");
-closeContact.addEventListener('click', ()=> contactModal.style.display = "none");
+openContact.addEventListener('click', ()=>{
+  contactModal.style.display = "flex";
+  setTimeout(()=>contactModal.classList.add("show"),10);
+});
+closeContact.addEventListener('click', ()=>{
+  contactModal.classList.remove("show");
+  setTimeout(()=>contactModal.style.display="none",300);
+});
 contactModal.addEventListener('click', (e)=>{
-  if(e.target === contactModal) contactModal.style.display = "none";
+  if(e.target===contactModal){
+    contactModal.classList.remove("show");
+    setTimeout(()=>contactModal.style.display="none",300);
+  }
 });
 
-// Auto-refresh cada 30s
 setInterval(loadData, 30000);
 </script>
 </body>

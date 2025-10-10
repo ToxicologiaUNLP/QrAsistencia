@@ -116,7 +116,7 @@ th:nth-child(4){
 }
 
 /* Modal visor PDF */
-#pdfModal{
+#pdfModal, #contactModal{
   position: fixed;
   top:0; left:0; right:0; bottom:0;
   background: rgba(0,0,0,0.8);
@@ -133,7 +133,7 @@ th:nth-child(4){
   box-shadow:0 4px 20px rgba(0,0,0,.5);
   background:#fff;
 }
-#pdfModal .close-btn{
+.close-btn{
   position:absolute;
   top:20px;
   right:30px;
@@ -142,8 +142,61 @@ th:nth-child(4){
   color:#fff;
   cursor:pointer;
 }
-#pdfModal .close-btn:hover{
+.close-btn:hover{
   color:#ddd;
+}
+
+/* Botón contacto */
+.contact-btn{
+  display:block;
+  margin:20px auto 0;
+  padding:10px 22px;
+  font-size:16px;
+  font-weight:bold;
+  text-decoration:none;
+  color:#fff;
+  background:#0b6a7f;
+  border:none;
+  cursor:pointer;
+  border-radius:8px;
+  box-shadow:0 3px 8px var(--shade);
+  transition: background 0.2s, transform 0.1s;
+}
+.contact-btn:hover{ background:#095866; }
+.contact-btn:active{ transform:scale(0.97); }
+
+/* Modal contacto */
+#contactModal .modal-content{
+  background:#ffffff;
+  padding:30px;
+  border-radius:14px;
+  max-width:600px;
+  width:90%;
+  max-height:80%;
+  overflow-y:auto;
+  text-align:center;
+  color:#003d4d;
+  box-shadow:0 4px 24px rgba(0,0,0,.4);
+}
+.contact-area{
+  margin-bottom:20px;
+}
+.contact-area h3{
+  margin:0;
+  font-size:20px;
+  color:#0b6a7f;
+}
+.contact-area p{
+  margin:6px 0;
+  font-size:15px;
+  color:#275b67;
+}
+.contact-area a{
+  color:#0b6a7f;
+  text-decoration:none;
+}
+.contact-area a:hover{
+  text-decoration:underline;
 }
 </style>
 </head>
@@ -160,12 +213,69 @@ th:nth-child(4){
     <div id="suggestions"></div>
   </div>
   <div id="result" class="details"></div>
+
+  <button class="contact-btn" id="openContact">Contacto</button>
 </main>
 
-<!-- Modal para visor PDF -->
+<!-- Modal visor PDF -->
 <div id="pdfModal">
   <span class="close-btn">&times;</span>
   <iframe src=""></iframe>
+</div>
+
+<!-- Modal de contacto -->
+<div id="contactModal">
+  <span class="close-btn" id="closeContact">&times;</span>
+  <div class="modal-content">
+    <div class="contact-area">
+      <h3>ADMISIÓN</h3>
+      <p>Internos: 1706 / 1754 / 1714</p>
+    </div>
+    <div class="contact-area">
+      <h3>ENDOCRINOLOGÍA</h3>
+      <p>Interno: 1732</p>
+      <p><a href="mailto:labendocrinoludovica@gmail.com">labendocrinoludovica@gmail.com</a></p>
+    </div>
+    <div class="contact-area">
+      <h3>HEMATOLOGÍA / HEMOSTASIA</h3>
+      <p>Internos: 1717 / 1733</p>
+      <p><a href="mailto:labhemato.ludovica@gmail.com">labhemato.ludovica@gmail.com</a></p>
+    </div>
+    <div class="contact-area">
+      <h3>GUARDIA</h3>
+      <p>Interno: 1715</p>
+      <p><a href="mailto:guardialabludovica@gmail.com">guardialabludovica@gmail.com</a></p>
+    </div>
+    <div class="contact-area">
+      <h3>INMUNOLOGÍA</h3>
+      <p>Internos: 1728 / 1729</p>
+      <p><a href="mailto:inmunoserologia.lab@gmail.com">inmunoserologia.lab@gmail.com</a></p>
+    </div>
+    <div class="contact-area">
+      <h3>MEDIO INTERNO</h3>
+      <p>Interno: 1716</p>
+      <p><a href="mailto:mediointernoludovica@gmail.com">mediointernoludovica@gmail.com</a></p>
+    </div>
+    <div class="contact-area">
+      <h3>METABOLOPATÍAS</h3>
+      <p>Interno: 1733</p>
+      <p><a href="mailto:labmetabolo@gmail.com">labmetabolo@gmail.com</a></p>
+    </div>
+    <div class="contact-area">
+      <h3>PARASITOLOGÍA</h3>
+      <p>Interno: 1730</p>
+      <p><a href="mailto:coproparasitologialudovica@gmail.com">coproparasitologialudovica@gmail.com</a></p>
+    </div>
+    <div class="contact-area">
+      <h3>QUÍMICA</h3>
+      <p>Interno: 1722</p>
+    </div>
+    <div class="contact-area">
+      <h3>TOXICOLOGÍA</h3>
+      <p>Interno: 1731</p>
+      <p><a href="mailto:labtoxicologia.ludovica@gmail.com">labtoxicologia.ludovica@gmail.com</a></p>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -307,10 +417,8 @@ function showTable(row){
   sugEl.style.display="none";
   inputEl.value = row[studyKey] || "";
 
-  // Construir tabla con posible botón en lugar de link
   const tbodyHtml = `<tr>${headers.map(h=>{
     const cell = row[normHeader(h)] || '';
-    // Detectar PDF en la celda
     if(cell.toLowerCase().includes('.pdf') || cell.toLowerCase().includes('drive.google.com')){
       let embedUrl = cell;
       const match = cell.match(/\/d\/([a-zA-Z0-9_-]+)\//);
@@ -333,12 +441,11 @@ function showTable(row){
   </table>`;
 }
 
-// Cerrar modal
+// Cerrar modal PDF
 pdfClose.addEventListener('click', ()=>{
   pdfModal.style.display = "none";
   pdfFrame.src = "";
 });
-
 pdfModal.addEventListener('click', (e)=>{
   if(e.target === pdfModal){
     pdfModal.style.display = "none";
@@ -346,11 +453,23 @@ pdfModal.addEventListener('click', (e)=>{
   }
 });
 
+// Modal contacto
+const contactModal = document.getElementById('contactModal');
+const openContact = document.getElementById('openContact');
+const closeContact = document.getElementById('closeContact');
+
+openContact.addEventListener('click', ()=> contactModal.style.display = "flex");
+closeContact.addEventListener('click', ()=> contactModal.style.display = "none");
+contactModal.addEventListener('click', (e)=>{
+  if(e.target === contactModal) contactModal.style.display = "none";
+});
+
 // Auto-refresh cada 30s
 setInterval(loadData, 30000);
 </script>
 </body>
 </html>
+
 
 
 

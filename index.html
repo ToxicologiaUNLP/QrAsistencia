@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Laboratorio Central</title>
+<link rel="icon" type="image/png" href="logolab.png">
 <style>
 :root{
   --bg:#61adc1;
@@ -45,10 +46,18 @@ main{
   margin-bottom: 12px; padding: 10px 12px; border-radius: 8px;
   font-size: 14px;
   background: #eef6ff; border:1px solid #cfe8ff; color:#0b4a6d;
+  transition: opacity 0.6s ease;
 }
 .status.ok{ background:#eefaf1; border-color:#cfeedd; color:#205b3a;}
 .status.err{ background:#fff2f2; border-color:#ffd0d0; color:#7a1c1c;}
 .search-wrap{ position: relative; margin-bottom:12px; }
+#searchLabel{
+  display:block;
+  font-weight:bold;
+  color:#0b6a7f;
+  margin-bottom:6px;
+  font-size:16px;
+}
 #searchBox{
   width:100%; padding:12px 14px; font-size:16px;
   border:1px solid #cfd8dc; border-radius:10px; outline:none;
@@ -225,6 +234,7 @@ th:nth-child(4){
 <main>
   <div id="status" class="status">Cargando datos…</div>
   <div class="search-wrap">
+    <label id="searchLabel" for="searchBox">Buscador</label>
     <input id="searchBox" type="text" placeholder="Escriba el tipo de estudio aquí" autocomplete="off" />
     <div id="suggestions"></div>
   </div>
@@ -332,6 +342,7 @@ function loadData(){
         if(!studyKey) throw new Error('No se encontró la columna "ESTUDIO" en el CSV.');
         statusEl.textContent = `Datos cargados: ${rows.length} estudios.`;
         statusEl.className = "status ok";
+        setTimeout(()=>{ statusEl.style.opacity='0'; },5000);
       }catch(err){
         statusEl.textContent = err.message;
         statusEl.className = "status err";
@@ -393,6 +404,7 @@ setInterval(loadData,30000);
 </script>
 </body>
 </html>
+
 
 
 
